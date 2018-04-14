@@ -1,10 +1,12 @@
 package com.example.helloworld;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.util.EntityUtils;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,17 +27,13 @@ public class CommuneResource {
     }
 
     @GET
-    public HttpResponse communes() throws IOException {
-        String abc = "";
+    public String communes() throws IOException {
         HttpGet request = new HttpGet("http://api.arbetsformedlingen.se/af/v0/platsannonser/soklista/kommuner?lanid=1");
-        request.setHeader("accept", "application/json");
-        request.setHeader("charset", "utf-8");
-        request.setHeader("qs", "1");
-        return httpClient.execute(request);
-//        return ImmutableMap.of(
-//                "name1", "id1",
-//                "name2", "id2"
-//        );
+        request.setHeader("accept", "application/json;charset=utf-8; qs=1");
+        request.setHeader("Accept-Language", "*");
+        HttpResponse response = httpClient.execute(request);
+        HttpEntity entity = response.getEntity();
+        return EntityUtils.toString(entity);
     }
 
     @GET
