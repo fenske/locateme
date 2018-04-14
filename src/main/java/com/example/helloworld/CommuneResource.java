@@ -1,11 +1,11 @@
 package com.example.helloworld;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
 
 import javax.ws.rs.GET;
@@ -33,7 +33,11 @@ public class CommuneResource {
         request.setHeader("Accept-Language", "*");
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();
-        return EntityUtils.toString(entity);
+
+        String stringEntity = EntityUtils.toString(entity);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map map = objectMapper.readValue(stringEntity, Map.class);
+        return objectMapper.writeValueAsString(map.get("soklista"));
     }
 
     @GET
@@ -41,6 +45,12 @@ public class CommuneResource {
     public Map<Integer, Integer> communeRank(
             @QueryParam("id1") Integer id1,
             @QueryParam("id2") Integer id2) {
+
+        HttpGet request = new HttpGet("http://api.arbetsformedlingen.se/af/v0/platsannonser/soklista/kommuner?lanid=1");
+        request.setHeader("accept", "application/json");
+        request.setHeader("charset", "utf-8");
+        request.setHeader("qs", "1");
+
         return ImmutableMap.of(
                 id1, 1,
                 id2, 2
