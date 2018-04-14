@@ -1,23 +1,22 @@
 package com.example.helloworld;
 
-import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.config.Bootstrap;
-import com.yammer.dropwizard.config.Environment;
+import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 
-public class LocateMeService extends Service<LocateMeConfiguration> {
+public class LocateMeService extends Application<LocateMeConfiguration> {
     public static void main(String[] args) throws Exception {
         new LocateMeService().run(args);
     }
 
     @Override
     public void initialize(Bootstrap<LocateMeConfiguration> bootstrap) {
-        bootstrap.setName("locateme");
     }
 
     @Override
     public void run(LocateMeConfiguration configuration,
                     Environment environment) {
-        environment.addResource(new CommuneResource());
+        environment.jersey().register(new CommuneResource());
     }
 
 

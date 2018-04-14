@@ -1,7 +1,6 @@
 package com.example.helloworld;
 
 import com.google.common.collect.ImmutableMap;
-import com.yammer.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,7 +14,6 @@ import java.util.Map;
 public class CommuneResource {
 
     @GET
-    @Timed
     public Map<String, String> communes() {
         return ImmutableMap.of(
                 "name1", "id1",
@@ -24,7 +22,6 @@ public class CommuneResource {
     }
 
     @GET
-    @Timed
     @Path("/rank")
     public Map<Integer, Integer> communeRank(
             @QueryParam("id1") Integer id1,
