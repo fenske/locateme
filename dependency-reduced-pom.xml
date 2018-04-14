@@ -39,17 +39,11 @@
           </filters>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-maven-plugin</artifactId>
-        <version>1.9.63</version>
-        <configuration>
-          <enableJarClasses>false</enableJarClasses>
-          <port>8181</port>
-          <address>0.0.0.0</address>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
 </project>
 
