@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -57,37 +58,35 @@ public class CommuneResource {
         return get(adId);
     }
 
-    @GET
-    @Path("/rank")
-    public Map<Integer, Integer> communeRank(@QueryParam("id1") Integer id1, @QueryParam("id2") Integer id2) throws IOException {
-        return ImmutableMap.of(
-                id1, rankOf(id1),
-                id2, rankOf(id2)
-        );
-    }
-
     private int rankOf(Integer id) throws IOException {
         final Map matchningslista1 = (Map) getAds("matchning?kommunid=" + id).get("matchningslista");
         return Integer.parseInt(objectMapper.writeValueAsString(matchningslista1.get("antal_platsannonser_exakta")));
     }
 
     @GET
-    @Path("/rank2")
-    public Map<Integer, Integer> communeRank2(@QueryParam("id1") Integer id1,
-                                              @QueryParam("id2") Integer id2,
-                                              @QueryParam("keyword") List<String> keywords) throws IOException {
+    @Path("/rank")
+    public Map<Integer, Integer> communeRank(@QueryParam("id1") Integer id1,
+                                             @QueryParam("id2") Integer id2,
+                                             @QueryParam("keyword") List<String> keywords) throws IOException {
 
-        return ImmutableMap.of(
-                id1, rankWithKeywords(id1, keywords),
-                id2, rankWithKeywords(id2, keywords)
-        );
+        if (keywords != null && keywords.size() > 0 && !StringUtils.isBlank(keywords.get(0))) {
+            return ImmutableMap.of(
+                    id1, rankWithKeywords(id1, keywords),
+                    id2, rankWithKeywords(id2, keywords)
+            );
+        } else {
+            return ImmutableMap.of(
+                    id1, rankOf(id1),
+                    id2, rankOf(id2)
+            );
+        }
     }
 
     @GET
-    @Path("/rank3")
-    public Map<String, Integer> communeRank3(@QueryParam("id1") String id1,
-                                             @QueryParam("id2") String id2,
-                                             @QueryParam("metric_key") String metricKey) {
+    @Path("/custom-rank")
+    public Map<String, Integer> customCommuneRank(@QueryParam("id1") String id1,
+                                                  @QueryParam("id2") String id2,
+                                                  @QueryParam("metric_key") String metricKey) {
         fillCache(id1, id2, metricKey);
 
         ImmutableMap<String, Integer> result = ImmutableMap.of(
@@ -113,7 +112,8 @@ public class CommuneResource {
         Set<String> adIds = Sets.newHashSet();
 
         for (String keyword : keywords) {
-            final Map matchningslista1 = (Map) getAds("matchning?lanid=1&nyckelord=" + keyword + "&antalrader=1000").get("matchningslista");
+            String keywordPart = !StringUtils.isBlank(keyword) ? ("&nyckelord=" + keyword) : "";
+            final Map matchningslista1 = (Map) getAds("matchning?lanid=1" + keywordPart + "&antalrader=1000").get("matchningslista");
             List<Map> matchings = (List<Map>) matchningslista1.get("matchningdata");
 
             for (Map<String, Object> x : matchings) {
