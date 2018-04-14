@@ -20,7 +20,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class CommuneResource {
 
+    private static final String BASE_URL = "http://api.arbetsformedlingen.se/af/v0/platsannonser/";
     private final HttpClient httpClient;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public CommuneResource(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -28,32 +30,29 @@ public class CommuneResource {
 
     @GET
     public String communes() throws IOException {
-        HttpGet request = new HttpGet("http://api.arbetsformedlingen.se/af/v0/platsannonser/soklista/kommuner?lanid=1");
+        return objectMapper.writeValueAsString(get("soklista/kommuner?lanid=1").get("soklista"));
+    }
+
+    private Map get(String path) throws IOException {
+        HttpGet request = new HttpGet(BASE_URL + path);
         request.setHeader("accept", "application/json;charset=utf-8; qs=1");
         request.setHeader("Accept-Language", "*");
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();
-
-        String stringEntity = EntityUtils.toString(entity);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map map = objectMapper.readValue(stringEntity, Map.class);
-        return objectMapper.writeValueAsString(map.get("soklista"));
+        return objectMapper.readValue(EntityUtils.toString(entity), Map.class);
     }
 
     @GET
     @Path("/rank")
-    public Map<Integer, Integer> communeRank(
-            @QueryParam("id1") Integer id1,
-            @QueryParam("id2") Integer id2) {
-
-        HttpGet request = new HttpGet("http://api.arbetsformedlingen.se/af/v0/platsannonser/soklista/kommuner?lanid=1");
-        request.setHeader("accept", "application/json");
-        request.setHeader("charset", "utf-8");
-        request.setHeader("qs", "1");
-
+    public Map<Integer, Integer> communeRank(@QueryParam("id1") Integer id1, @QueryParam("id2") Integer id2) throws IOException {
         return ImmutableMap.of(
-                id1, 1,
-                id2, 2
+                id1, rankOf(id1),
+                id2, rankOf(id2)
         );
+    }
+
+    private int rankOf(@QueryParam("id1") Integer id1) throws IOException {
+        final Map matchningslista1 = (Map) get("matchning?kommunid=" + id1).get("matchningslista");
+        return Integer.parseInt(objectMapper.writeValueAsString(matchningslista1.get("antal_platsannonser_exakta")));
     }
 }
