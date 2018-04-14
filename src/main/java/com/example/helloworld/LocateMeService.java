@@ -2,8 +2,10 @@ package com.example.helloworld;
 
 import io.dropwizard.Application;
 import io.dropwizard.client.HttpClientBuilder;
+import io.dropwizard.client.HttpClientConfiguration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Duration;
 import org.apache.http.client.HttpClient;
 
 public class LocateMeService extends Application<LocateMeConfiguration> {
@@ -19,8 +21,11 @@ public class LocateMeService extends Application<LocateMeConfiguration> {
     public void run(LocateMeConfiguration configuration,
                     Environment environment) {
 
+        HttpClientConfiguration httpClientConfiguration = configuration.getHttpClientConfiguration();
+        httpClientConfiguration.setTimeout(Duration.seconds(5));
+
         final HttpClient httpClient = new HttpClientBuilder(environment)
-                .using(configuration.getHttpClientConfiguration())
+                .using(httpClientConfiguration)
                 .build("client");
         environment.jersey().register(new CommuneResource(httpClient));
     }
