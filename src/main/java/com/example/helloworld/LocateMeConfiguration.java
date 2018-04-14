@@ -14,11 +14,13 @@ public class LocateMeConfiguration extends Configuration {
     @NotNull
     private HttpClientConfiguration httpClient = new HttpClientConfiguration();
 
-    @NotEmpty
-    @JsonProperty
-    private String defaultName = "Stranger";
+    @JsonProperty("httpClient")
+    public HttpClientConfiguration getHttpClientConfiguration() {
+        return httpClient;
+    }
 
-    public String getDefaultName() {
-        return defaultName;
+    @JsonProperty("httpClient")
+    public void setHttpClientConfiguration(HttpClientConfiguration httpClient) {
+        this.httpClient = httpClient;
     }
 }
